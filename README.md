@@ -34,7 +34,7 @@ Usage: ./vkbdd [OPTION..]
   -f        if named pipe exists, overwrite
   -h        print this help message
   -n        disable debug logging to /tmp/vkbdd.debug.log
-  -p <file> path/file to named pipe to read (default /tmp/retropie-vkbd)
+  -p <file> path/file to named pipe to read (default /tmp/vkbdd.fifo)
   -u <user> username to chown pipe (default current user)
   -v        print program version and exit
 ```
