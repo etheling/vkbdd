@@ -43,7 +43,7 @@ NOTE: It is very important that `input_enable_hotkey =` is NOT set in any RetroA
 
 ## vkeyboard
 
-Vkeyboard is a command line utility to help find keycodes that should be sent to vkbdd to get a desired key press generated. Vkeyboard lets user type in characters, and it will display appropriate character value to send to vkbdd in upper right corner in decimal (e.g. 13 for Enter). It also provides complete command-line for using fprint command to send the key to vkbdd at the lower part of the screen (e.g. "printf '\015' > /tmp/vkbdd.fifo" to send Enter. Alternatively translations can be found from the [source](https://github.com/midael/retropie-vkbd/blob/master/src/vkbdd.c#L78).
+Vkeyboard is a command line utility to help find keycodes that should be sent to vkbdd to get a desired key press generated. Vkeyboard lets user type in characters, and it will display appropriate character value to send to vkbdd in upper right corner in decimal (e.g. 13 for Enter). It also provides complete command-line for using fprint command to send the key to vkbdd at the lower part of the screen (e.g. "printf '\015' > /tmp/vkbdd.fifo" to send Enter. Alternatively translations can be found from the [source](https://github.com/midael/retropie-vkbd/blob/master/src/vkbdd.c#L75-L212).
 
 ```
 $ ./vkeyboard -h
@@ -56,20 +56,20 @@ Usage: ./vkeyboard [OPTION..]
   -v        print program version and exit
 ```
 
-For example to send key presses for character 'm' followed by ESC (to enable next shader (m), and then exit running emulator (ESC)) to RetroArch following shell commands can be used.
+![vkeyboard screenshot](images/vkeyboard00.png)
+
+For example to send key presses for character 'm' followed by ESC (to enable next shader (m), and then exit running emulator (ESC)) to RetroArch following shell commands can be used. It's a good practise to test if everything works by testing sending key presses to vkbdd from shell and observing that desired 'effect' occurs before entering commands to triggerhappy configuration. Confusingly, printf syntax used requires octal number 'format' so decimal number needs to be first converted to octal (hence 27 decimal becomes 033 octal, or 142 decimal for F5 becomes 216 octal for printf command. As seen in the screenshot above, this conversion is done by vkeyboard.
 
 ```
 $ echo -n m > /tmp/vkbdd.fifo
 $ printf '/033' > /tmp/vkbdd.fifo ; # note ESC is 27 decimal, which is 033 octal
 ```
 
-![vkeyboard screenshot](images/vkeyboard00.png)
-
 NOTE: vkeyboard should probably be only used over SSH connection. Running it locally (e.g. running it on same hardware that keyboard is attached to) may cause key presses to be sent back to vkeyboard which will likely result as undefined behavior. If running vkeyboard locally is desired, then -s switch for simulate should be used to avoid forwarding the key presses to vkbdd.
 
 ## Sample triggerhappy configuration to use with vkbdd
 
-Below is a sample triggerhappy configuration that uses vkbdd to convert gamepad button press combinations to key presses for RetroArch. When triggerhappy detects button event, or button combination, /usr/bin/printf is used to send key code to vkbdd FIFO to be converted into a key press (triggerhappy configs require absolute path to command). Mappings in the example are as follows and assume default RetroArch key bindings in RetroPie 4.6:
+Triggerhappy is installed and running by default in RetroPie 4.6. Below is a sample [triggerhappy](https://github.com/wertarbyte/triggerhappy/) configuration that uses vkbdd to convert gamepad button press combinations to key presses for RetroArch. When triggerhappy detects button event, or button combination, /usr/bin/printf is used to send key code to vkbdd FIFO to be converted into a key press (triggerhappy configs require absolute path to command). Mappings in the example are as follows and assume default RetroArch key bindings in RetroPie 4.6:
 
 - Xbox button -> generate F1 key press to enter RetroArch menu
 - select+start -> generate ESC to exit currently running emulator
@@ -85,7 +85,10 @@ BTN_SELECT+BTN_START		1	/usr/bin/printf '\033' > /tmp/vkbdd.fifo # ESC / exit em
 BTN_THUMBL+BTN_B		1	/usr/bin/printf m > /tmp/vkbdd.fifo # next shader
 BTN_THUMBL+BTN_NORTH		1	/usr/bin/printf n > /tmp/vkbdd.fifo # prev shader
 BTN_THUMBL+BTN_WEST		1	/usr/bin/printf '\214' > /tmp/vkbdd.fifo # F3 fps on/off
+BTN_WEST+BTN_NORTH+BTN_B	1	/usr/bin/logger "B+X+Y pressed" # 3-button combo. Logged to /var/log/messages
 ```
+In order to find correct BTN_ events for creating triggerhappy config for a given gamepad, use `evtest` on gamepads js* device. For example `$ thd --dump /dev/input/event*` assuming gamepad is registered as js0. After editing/adding configuration, triggerhappy needs to be restarted using `$ sudo systemctl restart triggerhappy`. After restart, check `/var/log/daemon.log` for any error messages.
+
 NOTE: It is very important that `input_enable_hotkey =` is NOT set in any RetroArch config file or for any gamepad. If enabled, for RetroArch to react to the key presses coming from vkbdd, also the hotkey would need to be pressed.
 
 # Security considerations
