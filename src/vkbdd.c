@@ -1,6 +1,4 @@
-// FIXME: warnings on Ubuntu
-
-/* BSD 2-Clause License
+/* BSD 2-Clause License -- https://github.com/etheling/vkbdd
 
 Copyright (c) 2020, Etheling Lydas (alias). All rights reserved.
 

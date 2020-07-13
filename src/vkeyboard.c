@@ -1,4 +1,4 @@
-/* BSD 2-Clause License
+/* BSD 2-Clause License -- https://github.com/etheling/vkbdd
 
 Copyright (c) 2020, Etheling Lydas (alias). All rights reserved.
 
@@ -50,6 +50,8 @@ char * myfifo = "/tmp/vkbdd.fifo";
 
 int bpos=0; // position in display
 int toosmall=0; // if display is too small
+int simulate=0; // sending to FIFO (or not)
+char pfpath[256]; // shell printf command path
 
 #define KBD_ROWS 11
 char kbd[KBD_ROWS][74] = {
@@ -204,6 +206,9 @@ void ui_banner (int xx) {
     ui_mvaddstr (8,0,p," ");
   }
   ui_mvaddstr (8,0,2,"Virtual Keyboard for RetroPie. CTRL+C to exit.");
+  if (simulate) {
+    ui_mvaddstr (8,0,49,"**** SIMULATION MODE ****");
+  }
 }
 
 void ui_draw_keyboard(void) {
@@ -248,7 +253,7 @@ void ui_update_emitchr (int c) {
         tc /= 8;
         i *= 10;
     }
-    snprintf (chbuffer, 80, "printf '\\%03d' > %s", octno, myfifo);
+    snprintf (chbuffer, 80, "%s '\\%03d' > %s", pfpath, octno, myfifo);
 
     ui_mvaddstr (4,14, 4, "$");
     ui_mvaddstr (0,14, 6, chbuffer);
@@ -357,9 +362,7 @@ int main(int argc, char *argv[])
   (void) signal(SIGPIPE, finish);   
 
   int fd; // FIFO file descriptor
-
   int cl;
-  int simulate=0;
   
   int newy, newx;
   char minmsg[80];	
@@ -373,7 +376,7 @@ int main(int argc, char *argv[])
 	  printf ("\nUsage: %s [OPTION..]\n", argv[0]);
 	  printf ("  -h        print this help message\n");
 	  printf ("  -p <file> path/file to named pipe to read (default /tmp/vkbdd.fifo)\n");
-	  printf ("  -s        simulate and don't connnect to or send keypresses to named pipe\n");
+	  printf ("  -s        simulate and don't connect to or send keypresses to named pipe\n");
 	  printf ("  -v        print program version and exit\n\n");   	  	  
 	  return 1;
 	case 'p':
@@ -396,7 +399,16 @@ int main(int argc, char *argv[])
 	}
     }
 
-
+    // Find printf path
+    char out[1024];
+    FILE *fp = popen("which printf","r");
+    if (fp && fgets(out, sizeof (out), fp)) {
+      snprintf (pfpath, sizeof(pfpath), "%s", out);
+      strtok(pfpath, "\n");
+    } else {
+      snprintf (pfpath, sizeof(pfpath), "printf");
+    }
+    pclose(fp);
   
     // test that we can connect - if FIFO exists, but there isn't reader, we stuck
     if (!simulate) {
