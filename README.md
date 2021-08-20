@@ -1,6 +1,8 @@
 # vkbdd - virtual keyboard daemon for RetroPie
 
-Vkbdd is a virtual keyboard daemon for sending key presses to RetroArch and Emulation Station in RetroPie. Vkbdd creates a virtual keyboard device that reads key presses from a named pipe and translates them to Linux keyboard events. It lets key presses to be generated programmatically or by manually echoing characters to the named pipe from the shell. When combined with triggerhappy (thd), RetroArch operations such as save and load game state, toggle FPS and others can be triggered from gamepad or from shell.
+NOTE: UNMAINTAINED AND UNTESTED AS OF 2021-08-01
+
+Vkbdd is a virtual keyboard daemon for sending key presses to RetroArch and Emulation Station in RetroPie on Raspberry Pi. Vkbdd creates a virtual keyboard device that reads key presses from a named pipe and translates them to Linux keyboard events. It lets key presses to be generated programmatically or by manually echoing characters to the named pipe from the shell. When combined with triggerhappy (thd), RetroArch operations such as save and load game state, toggle FPS and others can be triggered from gamepad or from shell.
 
 RetroPie (as of version 4.6) doesn't support triggering actions such as changing shaders or exiting the emulator by pressing an arbitrary combination of gamepad buttons (e.g. A+B+C). Some onerous workarounds by e.g. using xboxdrv do exist, but they can be daunting to setup and maintain. Vkbdd in combination with triggerhappy (thd) daemon solves this problem and allows sending key presses to Retroarch and Emulation Station based on button events from the gamepad. Vkbdd is specifically intended to be used with RetroPie, but it might be useful in other contexts where X-Window is replaced with custom application.
 
